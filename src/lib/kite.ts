@@ -75,9 +75,80 @@ async function fetchInstrumentTokens(): Promise<Record<string, number>> {
   }
 }
 
+async function fetchYahooFinanceEOD(symbol: string, days: number = 250): Promise<OHLCV[] | null> {
+  try {
+    let yahooSymbol = symbol;
+    if (symbol === 'NIFTY50') {
+      yahooSymbol = '^NSEI';
+    } else if (symbol === 'BANKNIFTY') {
+      yahooSymbol = '^NSEBANK';
+    } else if (!symbol.endsWith('.NS') && !symbol.endsWith('.BO')) {
+      yahooSymbol = `${symbol}.NS`;
+    }
+
+    // Map requested history duration to Yahoo Finance valid ranges
+    let range = '1y';
+    if (days <= 5) range = '5d';
+    else if (days <= 22) range = '1mo';
+    else if (days <= 66) range = '3mo';
+    else if (days <= 132) range = '6mo';
+    else if (days <= 260) range = '1y';
+    else if (days <= 520) range = '2y';
+    else range = '5y';
+
+    const url = `https://query1.finance.yahoo.com/v8/finance/chart/${yahooSymbol}?range=${range}&interval=1d`;
+    console.log(`Fetching from Yahoo Finance: ${url}`);
+    
+    const response = await fetch(url);
+    if (!response.ok) {
+      throw new Error(`Yahoo Finance HTTP error: ${response.status}`);
+    }
+
+    const json = await response.json();
+    const result = json.chart?.result?.[0];
+    if (!result) {
+      throw new Error('No chart result found in Yahoo Finance response');
+    }
+
+    const timestamps = result.timestamp || [];
+    const quote = result.indicators?.quote?.[0];
+    if (!quote || timestamps.length === 0) {
+      throw new Error('Missing indicators or timestamps in Yahoo Finance response');
+    }
+
+    const candles: OHLCV[] = [];
+    for (let i = 0; i < timestamps.length; i++) {
+      const date = new Date(timestamps[i] * 1000).toISOString().split('T')[0];
+      const open = quote.open?.[i];
+      const high = quote.high?.[i];
+      const low = quote.low?.[i];
+      const close = quote.close?.[i];
+      const volume = quote.volume?.[i] || 0;
+
+      // Ensure we don't push null values (Yahoo can sometimes have null values on holidays)
+      if (open !== null && high !== null && low !== null && close !== null && 
+          open !== undefined && high !== undefined && low !== undefined && close !== undefined) {
+        candles.push({
+          date,
+          open: Number(open),
+          high: Number(high),
+          low: Number(low),
+          close: Number(close),
+          volume: Number(volume),
+        });
+      }
+    }
+
+    return candles;
+  } catch (error) {
+    console.error(`Failed to fetch from Yahoo Finance for ${symbol}:`, error);
+    return null;
+  }
+}
+
 /**
  * Fetches historical daily EOD data for a given symbol.
- * Falls back to mock data if Kite credentials are not available or if the API request fails.
+ * Falls back to Yahoo Finance or mock data if Kite credentials are not available or if the API request fails.
  */
 export async function getHistoricalEOD(
   symbol: string,
@@ -126,11 +197,19 @@ export async function getHistoricalEOD(
         }));
       }
     } catch (error) {
-      console.error(`Error fetching real EOD data for ${symbol}, falling back to mock data:`, error);
+      console.error(`Error fetching real EOD data for ${symbol}, falling back to Yahoo Finance:`, error);
     }
   }
 
-  // Generate realistic mock data
+  // Fallback to Yahoo Finance (free public API) if Kite is unavailable or fails
+  console.log(`Kite credentials missing or failed. Fetching ${symbol} EOD data from Yahoo Finance...`);
+  const yahooData = await fetchYahooFinanceEOD(symbol, days);
+  if (yahooData && yahooData.length > 0) {
+    return yahooData;
+  }
+
+  // Generate realistic mock data as a last-resort fallback
+  console.warn(`Yahoo Finance failed. Using local mock generator for ${symbol} EOD data.`);
   return generateMockOHLCV(symbol, days);
 }
 
