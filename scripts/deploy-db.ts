@@ -37,7 +37,21 @@ if (!connectionString || !supabaseUrl || !supabaseServiceKey) {
   process.exit(1);
 }
 
-const pgClient = new Client({ connectionString });
+// Log connection string (masking password)
+const maskedUrl = connectionString.replace(/:([^:@]+)@/, ':****@');
+console.log(`Parsed Connection String: ${maskedUrl}`);
+console.log(`Parsed Supabase URL: ${supabaseUrl}`);
+console.log(`Parsed Service Role Key (first 15 chars): ${supabaseServiceKey.substring(0, 15)}...`);
+
+
+process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
+
+const pgClient = new Client({ 
+  connectionString,
+  ssl: {
+    rejectUnauthorized: false
+  }
+});
 const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey, {
   auth: {
     autoRefreshToken: false,
