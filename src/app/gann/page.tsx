@@ -44,11 +44,12 @@ export default function GannPage() {
             
             <form onSubmit={handleCalculate} className="flex flex-col gap-3">
               <div className="flex flex-col gap-1.5">
-                <label className="text-[10px] text-slate-400 font-semibold uppercase tracking-wider">
+                <label htmlFor="price-input" className="text-[10px] text-slate-400 font-semibold uppercase tracking-wider">
                   Reference Price (Pivot)
                 </label>
                 <div className="flex gap-2">
                   <input
+                    id="price-input"
                     type="number"
                     step="any"
                     value={priceInput}

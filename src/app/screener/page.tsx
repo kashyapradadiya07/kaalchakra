@@ -221,10 +221,11 @@ export default function ScreenerPage() {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 p-5 bg-slate-900/20 border border-slate-900 rounded-2xl">
         {/* Search */}
         <div className="flex flex-col gap-1.5">
-          <label className="text-[10px] text-slate-400 font-semibold uppercase tracking-wider">Search</label>
+          <label htmlFor="search-input" className="text-[10px] text-slate-400 font-semibold uppercase tracking-wider">Search</label>
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
             <input
+              id="search-input"
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
@@ -236,8 +237,9 @@ export default function ScreenerPage() {
 
         {/* Sector */}
         <div className="flex flex-col gap-1.5">
-          <label className="text-[10px] text-slate-400 font-semibold uppercase tracking-wider">Sector</label>
+          <label htmlFor="sector-select" className="text-[10px] text-slate-400 font-semibold uppercase tracking-wider">Sector</label>
           <select
+            id="sector-select"
             value={selectedSector}
             onChange={(e) => setSelectedSector(e.target.value)}
             className="w-full px-3 py-2 text-xs bg-slate-950 border border-slate-800 rounded-xl focus:outline-none focus:border-amber-500 text-slate-300"
@@ -252,8 +254,9 @@ export default function ScreenerPage() {
 
         {/* Price Range */}
         <div className="flex flex-col gap-1.5">
-          <label className="text-[10px] text-slate-400 font-semibold uppercase tracking-wider">Price Level</label>
+          <label htmlFor="price-range-select" className="text-[10px] text-slate-400 font-semibold uppercase tracking-wider">Price Level</label>
           <select
+            id="price-range-select"
             value={selectedPriceRange}
             onChange={(e) => setSelectedPriceRange(e.target.value)}
             className="w-full px-3 py-2 text-xs bg-slate-950 border border-slate-800 rounded-xl focus:outline-none focus:border-amber-500 text-slate-300"
@@ -268,8 +271,9 @@ export default function ScreenerPage() {
 
         {/* RSI Oscillator */}
         <div className="flex flex-col gap-1.5">
-          <label className="text-[10px] text-slate-400 font-semibold uppercase tracking-wider">RSI Oscillator</label>
+          <label htmlFor="rsi-filter-select" className="text-[10px] text-slate-400 font-semibold uppercase tracking-wider">RSI Oscillator</label>
           <select
+            id="rsi-filter-select"
             value={selectedRsiFilter}
             onChange={(e) => setSelectedRsiFilter(e.target.value)}
             className="w-full px-3 py-2 text-xs bg-slate-950 border border-slate-800 rounded-xl focus:outline-none focus:border-amber-500 text-slate-300"
@@ -284,8 +288,9 @@ export default function ScreenerPage() {
 
         {/* SMA Cross / Filter */}
         <div className="flex flex-col gap-1.5">
-          <label className="text-[10px] text-slate-400 font-semibold uppercase tracking-wider">Trend Filter</label>
+          <label htmlFor="trend-filter-select" className="text-[10px] text-slate-400 font-semibold uppercase tracking-wider">Trend Filter</label>
           <select
+            id="trend-filter-select"
             value={selectedSmaFilter}
             onChange={(e) => setSelectedSmaFilter(e.target.value)}
             className="w-full px-3 py-2 text-xs bg-slate-950 border border-slate-800 rounded-xl focus:outline-none focus:border-amber-500 text-slate-300"
